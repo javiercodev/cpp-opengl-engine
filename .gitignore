@@ -1,0 +1,51 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# Other IDEs (useful once you build on macOS/Linux too)
+.vscode/
+.idea/
+cmake-build-*/
+
+# CMake
+out/
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+_deps/
+
+# Build output (Windows)
+bin/
+x64/
+x86/
+Debug/
+Release/
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.log
+
+# Build output (Linux/macOS)
+*.o
+*.out
+*.a
+*.so
+*.dylib
+
+# vcpkg
+vcpkg/
+vcpkg_installed/
+
+# OS-specific junk
+Thumbs.db
+.DS_Store

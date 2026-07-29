@@ -114,11 +114,20 @@ OWindow::~OWindow()
 
 void OWindow::makeCurrentContext()
 {
-	wglMakeCurrent((HDC)GetDC((HWND)m_handle), (HGLRC)m_context);
+	// Reuses the DC stored at construction time instead of calling GetDC()
+	// again — this window owns a single private DC (CS_OWNDC).
+	wglMakeCurrent((HDC)m_hdc, (HGLRC)m_context);
 }
 
 void OWindow::present(bool vsync)
 {
-	wglSwapIntervalEXT(vsync);
-	wglSwapLayerBuffers((HDC)GetDC((HWND)m_handle), WGL_SWAP_MAIN_PLANE);
+	// TODO: call wglSwapIntervalEXT once during init if you want persistent VSync control
+	SwapBuffers((HDC)m_hdc);
+}
+
+ORect OWindow::getInnerSize()
+{
+	RECT rect;
+	GetClientRect((HWND)m_handle, &rect);
+	return ORect(rect.right - rect.left, rect.bottom - rect.top);
 }

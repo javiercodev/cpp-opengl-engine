@@ -1,4 +1,5 @@
 #pragma once
+#include <ogl3d/math/orect.h>
 
 // Thin wrapper around a native Win32 window plus its OpenGL render context.
 class OWindow
@@ -6,6 +7,8 @@ class OWindow
 public:
 	OWindow();
 	~OWindow();
+
+	ORect getInnerSize(); // client-area size in pixels, used to set the GL viewport
 
 	void makeCurrentContext();  // binds this window's GL context to the calling thread
 	void present(bool vsync);   // swaps the front/back buffers to show the last frame

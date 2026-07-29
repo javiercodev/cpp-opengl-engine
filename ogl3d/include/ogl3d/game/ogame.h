@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <ogl3d/oprerequisites.h>
 
 // Forward declaration to avoid pulling in owindow.h (and Windows.h) here
 class OWindow;
@@ -25,4 +26,7 @@ protected:
 	bool m_isRunning = true;
 	std::unique_ptr<OGraphicsEngine> m_graphicsEngine; // owns the graphics engine; auto-cleaned on destruction
 	std::unique_ptr<OWindow> m_display; // owns the window; auto-cleaned on destruction
+
+	// Temporary: the demo triangle's VAO, set up in onCreate() and drawn in onUpdate()
+	OVertexArrayObjectPtr m_triangleVAO;
 };

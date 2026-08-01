@@ -29,7 +29,7 @@ void OGame::run()
 		}
 
 		// Render one frame: clear, let the game draw, then present it
-		m_graphicsEngine->clear(Ovec4(0.2f, 0.3f, 0.3f, 1.0f));
+		m_graphicsEngine->clear(Ovec4(0.1f, 0.1f, 0.1f, 1.0f));
 		onUpdate();
 		m_display->present(false);
 

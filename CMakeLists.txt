@@ -21,7 +21,7 @@ add_executable(cpp-opengl-engine
     game/main.cpp
     ${OGL3D_SOURCES}
     ${GLAD_SOURCES}
- "ogl3d/include/ogl3d/math/ovec4.h" "ogl3d/include/ogl3d/oprerequisites.h" "ogl3d/source/ogl3d/graphics/win32/cwin32graphicsengine.cpp" "ogl3d/include/ogl3d/math/orect.h" "ogl3d/include/ogl3d/graphics/overtexarrayobject.h" "ogl3d/source/ogl3d/graphics/overtexarrayobject.cpp")
+ "ogl3d/include/ogl3d/math/ovec4.h" "ogl3d/include/ogl3d/oprerequisites.h" "ogl3d/source/ogl3d/graphics/win32/cwin32graphicsengine.cpp" "ogl3d/include/ogl3d/math/orect.h" "ogl3d/include/ogl3d/graphics/overtexarrayobject.h" "ogl3d/source/ogl3d/graphics/overtexarrayobject.cpp" "ogl3d/include/ogl3d/graphics/oshaderprogram.h" "ogl3d/source/ogl3d/graphics/oshaderprogram.cpp")
 
 # Lets code do #include <ogl3d/...> and #include "owindow.h" without full paths
 target_include_directories(cpp-opengl-engine PRIVATE

@@ -1,5 +1,6 @@
 #include <ogl3d/graphics/ographicsengine.h>
 #include <ogl3d/graphics/overtexarrayobject.h>
+#include <ogl3d/graphics/oshaderprogram.h>
 #include <glad/glad.h>
 
 // Platform-agnostic rendering commands. Context/extension setup lives in
@@ -9,6 +10,11 @@
 OVertexArrayObjectPtr OGraphicsEngine::createVertexArrayObject(const OVertexBufferData& data)
 {
 	return std::make_shared<OVertexArrayObject>(data);
+}
+
+OShaderProgramPtr OGraphicsEngine::createShaderProgram(const OShaderProgramDesc& desc)
+{
+	return std::make_shared<OShaderProgram>(desc);
 }
 
 void OGraphicsEngine::clear(const Ovec4& color)
@@ -25,6 +31,11 @@ void OGraphicsEngine::setViewport(const ORect& size)
 void OGraphicsEngine::setVertexArrayObject(const OVertexArrayObjectPtr& vao)
 {
 	glBindVertexArray(vao->getId());
+}
+
+void OGraphicsEngine::setShaderProgram(const OShaderProgramPtr& program)
+{
+	glUseProgram(program->getId());
 }
 
 void OGraphicsEngine::drawTriangles(ui32 vertexCount, ui32 offset)

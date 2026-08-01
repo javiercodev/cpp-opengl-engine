@@ -27,6 +27,7 @@ protected:
 	std::unique_ptr<OGraphicsEngine> m_graphicsEngine; // owns the graphics engine; auto-cleaned on destruction
 	std::unique_ptr<OWindow> m_display; // owns the window; auto-cleaned on destruction
 
-	// Temporary: the demo triangle's VAO, set up in onCreate() and drawn in onUpdate()
+	// Temporary: the demo triangle's resources, set up in onCreate() and drawn in onUpdate()
 	OVertexArrayObjectPtr m_triangleVAO;
+	OShaderProgramPtr m_shader;
 };

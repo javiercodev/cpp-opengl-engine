@@ -22,17 +22,26 @@ OGame::~OGame()
 
 void OGame::onCreate()
 {
-	// A single triangle, positions only (x, y, z) — no color/UV attributes yet
+	// A single triangle, now with 2 attributes per vertex: position (xyz)
+	// followed by color (rgb) — interleaved, 6 floats per vertex total
 	const f32 triangleVertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+		-0.5f, -0.5f, 0.0f,   1, 0, 0, // bottom-left,  red
+		 0.5f, -0.5f, 0.0f,   0, 1, 0, // bottom-right, green
+		 0.0f,  0.5f, 0.0f,   0, 0, 1  // top,          blue
+	};
+
+	// Layout matching the interleaved data above: 3 floats (position), then 3 floats (color)
+	OVertexAttribute attribsList[] = {
+		{3}, // position
+		{3}  // color
 	};
 
 	m_triangleVAO = m_graphicsEngine->createVertexArrayObject({
 		(void*)triangleVertices,
-		sizeof(f32) * 3, // bytes per vertex (3 floats)
-		3                // vertex count
+		sizeof(f32) * 6, // bytes per vertex (3 position + 3 color)
+		3,                // vertex count
+		attribsList,
+		2                 // attribute count
 		});
 
 	// Shaders now live in their own files (previously inlined as raw strings)

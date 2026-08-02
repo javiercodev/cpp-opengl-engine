@@ -6,6 +6,7 @@
 #include <iostream>
 #include <filesystem>
 #include <Windows.h>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -29,7 +30,7 @@ OShaderProgram::OShaderProgram(const OShaderProgramDesc& desc)
 OShaderProgram::~OShaderProgram()
 {
 	// Detach + delete each stage that was successfully attached
-	// (a stage that failed to load leaves its slot at 0, so it's skipped)
+	// (a stage that failed to load/compile leaves its slot at 0, so it's skipped)
 	for (ui32 i = 0; i < 2; i++)
 	{
 		if (m_attachedShaders[i])
@@ -69,8 +70,7 @@ void OShaderProgram::attach(const wchar_t* shaderFilePath, const OShaderType& ty
 	}
 	else
 	{
-		std::cerr << "ERROR: Could not open shader file" << std::endl;
-		std::cerr << "  Tried: " << fullPath.string() << std::endl;
+		OGL3D_WARNING("OShaderProgram | " << shaderFilePath << " not found");
 		return; // leaves this stage's slot at 0 / unattached
 	}
 
@@ -84,19 +84,35 @@ void OShaderProgram::attach(const wchar_t* shaderFilePath, const OShaderType& ty
 	glShaderSource(shaderId, 1, &sourcePointer, NULL);
 	glCompileShader(shaderId);
 
+	// Check the real compile status first. The info log is only used for
+	// diagnostics here — some drivers write a non-empty log even on a
+	// successful compile, so its presence alone can't be used to decide
+	// success/failure (that was the previous bug: any non-empty log bailed
+	// out before glAttachShader below, even for shaders that compiled fine).
 	int success = 0;
 	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
+
+	i32 logLength = 0;
+	glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &logLength);
+	if (logLength > 0)
+	{
+		std::vector<char> errorMessage(logLength + 1);
+		glGetShaderInfoLog(shaderId, logLength, NULL, &errorMessage[0]);
+		OGL3D_WARNING("OShaderProgram | " << shaderFilePath
+			<< (success ? " compiled with warnings: " : " compile error: ")
+			<< std::endl << &errorMessage[0]);
+	}
+
 	if (!success)
 	{
-		char infoLog[512] = {};
-		glGetShaderInfoLog(shaderId, 511, NULL, infoLog);
-		std::cerr << "Shader compile error (";
-		std::cerr << (type == VertexShader ? "vertex" : "fragment");
-		std::cerr << "):\n" << infoLog << std::endl;
+		glDeleteShader(shaderId); // never attached, so it won't be cleaned up in the destructor
+		return; // leaves this stage's slot at 0 / unattached
 	}
 
 	glAttachShader(m_programId, shaderId);
 	m_attachedShaders[type] = shaderId;
+
+	OGL3D_INFO("OShaderProgram | " << shaderFilePath << " compiled and attached successfully");
 }
 
 void OShaderProgram::link()
@@ -105,10 +121,15 @@ void OShaderProgram::link()
 
 	int success = 0;
 	glGetProgramiv(m_programId, GL_LINK_STATUS, &success);
-	if (!success)
+
+	i32 logLength = 0;
+	glGetProgramiv(m_programId, GL_INFO_LOG_LENGTH, &logLength);
+	if (logLength > 0)
 	{
-		char infoLog[512] = {};
-		glGetProgramInfoLog(m_programId, 511, NULL, infoLog);
-		std::cerr << "Shader link error:\n" << infoLog << std::endl;
+		std::vector<char> errorMessage(logLength + 1);
+		glGetProgramInfoLog(m_programId, logLength, NULL, &errorMessage[0]);
+		OGL3D_WARNING("OShaderProgram | "
+			<< (success ? "link warnings: " : "link error: ")
+			<< std::endl << &errorMessage[0]);
 	}
 }

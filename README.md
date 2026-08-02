@@ -6,14 +6,15 @@ A simple 3D engine built from scratch in C++ using OpenGL and the native Win32 A
 
 ## Screenshots
 
-![Triangle rendered with a custom shader](screenshots/triangle.png)
+![Triangle rendered with a custom shader](screenshots/triangle_02.png)
 
 ## Features
 
 - **Native Win32 windowing** — no GLFW/SDL, the window is created and managed directly via the Win32 API
 - **OpenGL 4.6 Core Profile context**, created through the modern `wglCreateContextAttribsARB` path (via [GLAD](https://glad.dav1d.de/))
-- **Vertex buffer abstraction** (`OVertexArrayObject`) wrapping VAO/VBO creation and cleanup
-- **Shader system** (`OShaderProgram`) that loads, compiles, and links vertex/fragment shaders from external `.vert`/`.frag` files, with compile/link error logging
+- **Vertex buffer abstraction** (`OVertexArrayObject`) wrapping VAO/VBO creation and cleanup, with support for multiple interleaved vertex attributes (e.g. position + color) per buffer
+- **Shader system** (`OShaderProgram`) that loads, compiles, and links vertex/fragment shaders from external `.vert`/`.frag` files, with compile/link status and error/warning logging
+- **Engine-wide logging** via `OGL3D_ERROR` / `OGL3D_WARNING` / `OGL3D_INFO` macros — errors throw, warnings and info are logged to the console
 - **Platform-agnostic core** — engine logic (`OGame`, `OGraphicsEngine`, ...) is separated from Win32-specific code (`cwin32*.cpp`), in preparation for future Linux/macOS support
 - **CMake-based build**, no Visual Studio project files required
 
@@ -97,6 +98,8 @@ OGame
 Code is split by platform to make future portability easier:
 - `ogame.cpp`, `ographicsengine.cpp`, etc. — platform-agnostic logic
 - `cwin32game.cpp`, `cwin32window.cpp`, `cwin32graphicsengine.cpp` — Win32-specific implementations
+
+Errors, warnings, and info messages across the engine go through `OGL3D_ERROR` / `OGL3D_WARNING` / `OGL3D_INFO` (defined in `oprerequisites.h`), giving consistent, prefixed logging instead of scattered `std::cerr`/`std::cout` calls.
 
 ## Roadmap
 

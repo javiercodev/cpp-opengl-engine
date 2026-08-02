@@ -56,12 +56,13 @@ OGraphicsEngine::OGraphicsEngine()
 
 	wglMakeCurrent(dummyDC, dummyContext);
 
-	// Now that a context is current, GLAD can resolve the WGL/GL function pointers
+	// Now that a context is current, GLAD can resolve the WGL/GL function pointers.
+	// Uses the new OGL3D_ERROR macro instead of a raw throw, for consistent logging.
 	if (!gladLoadWGL(dummyDC))
-		throw std::runtime_error("Failed to initialize OpenGL context");
+		OGL3D_ERROR("Failed to initialize OpenGL context");
 
 	if (!gladLoadGL())
-		throw std::runtime_error("Failed to initialize OpenGL context");
+		OGL3D_ERROR("Failed to initialize OpenGL context");
 
 	// Tear down the dummy context/window; the real one gets created by OWindow
 	wglMakeCurrent(NULL, NULL);

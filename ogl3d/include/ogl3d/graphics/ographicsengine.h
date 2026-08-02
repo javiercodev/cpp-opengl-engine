@@ -13,8 +13,8 @@ public:
 	OGraphicsEngine();
 	~OGraphicsEngine();
 public:
-	// Uploads vertex data to the GPU and returns a VAO wrapping it
-	OVertexArrayObjectPtr createVertexArrayObject(const OVertexBufferData& data);
+	// Uploads vertex data (and its attribute layout) to the GPU, returns a VAO wrapping it
+	OVertexArrayObjectPtr createVertexArrayObject(const OVertexBufferDesc& data);
 	// Compiles + links a vertex/fragment shader pair from disk
 	OShaderProgramPtr createShaderProgram(const OShaderProgramDesc& desc);
 public:

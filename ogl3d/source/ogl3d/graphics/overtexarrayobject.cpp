@@ -1,8 +1,12 @@
 #include <ogl3d/graphics/overtexarrayobject.h>
 #include <glad/glad.h>
 
-OVertexArrayObject::OVertexArrayObject(const OVertexBufferData& data)
+OVertexArrayObject::OVertexArrayObject(const OVertexBufferDesc& data)
 {
+	if (!data.listSize) OGL3D_ERROR("OVertexArrayObject | listSize is NULL");
+	if (!data.vertexSize) OGL3D_ERROR("OVertexArrayObject | vertexSize is NULL");
+	if (!data.verticesList) OGL3D_ERROR("OVertexArrayObject | verticesList is NULL");
+
 	// 1. Create and bind VAO first (required in Core Profile)
 	glGenVertexArrays(1, &m_vertexArrayObjectId);
 	glBindVertexArray(m_vertexArrayObjectId);
@@ -12,9 +16,24 @@ OVertexArrayObject::OVertexArrayObject(const OVertexBufferData& data)
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, data.vertexSize * data.listSize, data.verticesList, GL_STATIC_DRAW);
 
-	// 3. Describe vertex layout: location 0, 3 floats per position, stride = vertexSize
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, data.vertexSize, (void*)0);
-	glEnableVertexAttribArray(0);
+	// 3. Describe each vertex attribute (location i, N floats, stride = vertexSize).
+	// Offset is the running total of floats consumed by all previous attributes
+	// (in bytes), so this works correctly for any number of attributes, not just 2.
+	ui32 offset = 0;
+	for (ui32 i = 0; i < data.attributesListSize; ++i)
+	{
+		glVertexAttribPointer(
+			i,
+			data.attributes[i].numElements,
+			GL_FLOAT,
+			GL_FALSE,
+			data.vertexSize,
+			(void*)(offset * sizeof(f32))
+		);
+		glEnableVertexAttribArray(i);
+
+		offset += data.attributes[i].numElements;
+	}
 
 	// 4. Unbind VAO (good practice)
 	glBindVertexArray(0);

@@ -11,9 +11,11 @@ int main()
 	}
 	catch (const std::exception& e)
 	{
-		// Log the error message and exit gracefully
-		std::cout << e.what() << std::endl;
-		return 1;
+		// Log the error message and exit gracefully.
+		// e.what() is narrow (const char*); the wide-stream overload of
+		// operator<< widens it automatically, so this still prints correctly.
+		std::wclog << e.what() << std::endl;
+		return -1;
 	}
 	return 0;
 }

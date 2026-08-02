@@ -7,7 +7,7 @@
 // cwin32graphicsengine.cpp; this file only wraps calls that GLAD already
 // exposes as plain OpenGL, with no Win32 dependency.
 
-OVertexArrayObjectPtr OGraphicsEngine::createVertexArrayObject(const OVertexBufferData& data)
+OVertexArrayObjectPtr OGraphicsEngine::createVertexArrayObject(const OVertexBufferDesc& data)
 {
 	return std::make_shared<OVertexArrayObject>(data);
 }

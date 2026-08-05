@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <ogl3d/oprerequisites.h>
+#include <chrono> 
 
 // Forward declaration to avoid pulling in owindow.h (and Windows.h) here
 class OWindow;
@@ -27,7 +28,15 @@ protected:
 	std::unique_ptr<OGraphicsEngine> m_graphicsEngine; // owns the graphics engine; auto-cleaned on destruction
 	std::unique_ptr<OWindow> m_display; // owns the window; auto-cleaned on destruction
 
-	// Temporary: the demo triangle's resources, set up in onCreate() and drawn in onUpdate()
-	OVertexArrayObjectPtr m_triangleVAO;
+	// Demo resources: Renamed to polygonVAO for general geometry; 
+	// Added Uniform Buffer support for modern shader data management.
+	OVertexArrayObjectPtr m_polygonVAO;
+	OUniformBufferPtr m_uniform;
 	OShaderProgramPtr m_shader;
+
+	// Timing and Animation:
+	// m_previousTime tracks the timestamp of the last frame for delta time calculation.
+	// m_scale is a demo parameter used to animate the polygon (e.g., pulsing or scaling logic).
+	std::chrono::system_clock::time_point m_previousTime;
+	f32 m_scale = 0;
 };

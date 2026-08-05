@@ -47,12 +47,24 @@ ui32 OShaderProgram::getId()
 	return m_programId;
 }
 
+void OShaderProgram::setUniformBufferSlot(const char* name, ui32 slot)
+{
+	// Modified: Added validation to ensure the uniform block exists.
+	// If the name is missing or optimized away by GLSL, we avoid an invalid binding.
+	ui32 index = glGetUniformBlockIndex(m_programId, name);
+	if (index == GL_INVALID_INDEX)
+	{
+		OGL3D_WARNING("OShaderProgram | Uniform block '" << name << "' not found in program ID: " << m_programId);
+		return;
+	}
+
+	glUniformBlockBinding(m_programId, index, slot);
+}
+
 void OShaderProgram::attach(const wchar_t* shaderFilePath, const OShaderType& type)
 {
 	// Try the path as-is first (relative to the working directory); if that
 	// doesn't exist, fall back to resolving it relative to the .exe's folder.
-	// This lets the same relative path work whether the game is launched from
-	// Visual Studio (working dir = project folder) or by double-clicking the .exe.
 	fs::path fullPath = shaderFilePath;
 	if (!fs::exists(fullPath))
 	{
@@ -84,11 +96,6 @@ void OShaderProgram::attach(const wchar_t* shaderFilePath, const OShaderType& ty
 	glShaderSource(shaderId, 1, &sourcePointer, NULL);
 	glCompileShader(shaderId);
 
-	// Check the real compile status first. The info log is only used for
-	// diagnostics here — some drivers write a non-empty log even on a
-	// successful compile, so its presence alone can't be used to decide
-	// success/failure (that was the previous bug: any non-empty log bailed
-	// out before glAttachShader below, even for shaders that compiled fine).
 	int success = 0;
 	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
 
@@ -105,8 +112,8 @@ void OShaderProgram::attach(const wchar_t* shaderFilePath, const OShaderType& ty
 
 	if (!success)
 	{
-		glDeleteShader(shaderId); // never attached, so it won't be cleaned up in the destructor
-		return; // leaves this stage's slot at 0 / unattached
+		glDeleteShader(shaderId);
+		return;
 	}
 
 	glAttachShader(m_programId, shaderId);
@@ -128,8 +135,16 @@ void OShaderProgram::link()
 	{
 		std::vector<char> errorMessage(logLength + 1);
 		glGetProgramInfoLog(m_programId, logLength, NULL, &errorMessage[0]);
-		OGL3D_WARNING("OShaderProgram | "
-			<< (success ? "link warnings: " : "link error: ")
-			<< std::endl << &errorMessage[0]);
+
+		// Modified: Elevated link failure to a fatal OGL3D_ERROR to prevent 
+		// difficult-to-debug black screens. Warnings are still logged as warnings.
+		if (!success)
+		{
+			OGL3D_ERROR("OShaderProgram | Program linking failed: " << std::endl << &errorMessage[0]);
+		}
+		else
+		{
+			OGL3D_WARNING("OShaderProgram | Program link warnings: " << std::endl << &errorMessage[0]);
+		}
 	}
 }

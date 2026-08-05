@@ -9,7 +9,14 @@ class OShaderProgram
 public:
 	OShaderProgram(const OShaderProgramDesc& desc);
 	~OShaderProgram();
+
 	ui32 getId();
+
+	// Logic for Uniform Buffer Objects (UBO):
+	// Maps a uniform block name defined in the shader to a specific binding point (slot).
+	// This must match the 'slot' used in OGraphicsEngine::setUniformBuffer to sync data.
+	void setUniformBufferSlot(const char* name, ui32 slot);
+
 private:
 	// Reads, compiles, and attaches a single shader stage from disk
 	void attach(const wchar_t* shaderFilePath, const OShaderType& type);

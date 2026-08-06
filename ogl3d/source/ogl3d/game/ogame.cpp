@@ -6,12 +6,13 @@
 #include <ogl3d/graphics/ouniformbuffer.h>
 #include <glad/glad.h>
 #include <iostream>
+#include <ogl3d/math/omat4.h>
 
 // Application-side representation of the constant buffer in the shader.
 // Structure padding should be considered for more complex data types.
 struct UniformData
 {
-	f32 scale;
+	OMat4 world;
 };
 
 OGame::OGame()
@@ -81,12 +82,47 @@ void OGame::onUpdate()
 
 	auto deltaTime = (f32)elapsedSeconds.count();
 
-	// Animate scale factor over time using a sine wave for a pulsing effect
-	m_scale += 3.14f * deltaTime;
-	auto currentScale = abs(sin(m_scale));
+	// Use a dedicated time accumulator to drive animation so translations oscillate
+	m_time += deltaTime;
+
+	// Parameters for animation (tweak to taste)
+	const f32 scaleSpeed = 2.0f;       // how fast the pulsing occurs
+	const f32 translationSpeed = 1.5f; // how fast the object moves left-right
+	const f32 translationAmp = 0.5f;   // amplitude of translation in world units
+
+	// Compute scale (pulses between 0.5 and 1.0)
+	auto currentScale = 0.75f + 0.25f * sinf(m_time * scaleSpeed);
+
+	// Compute translation (oscillates between -translationAmp..+translationAmp)
+	auto translationX = sinf(m_time * translationSpeed) * translationAmp;
+
+	OGL3D_INFO("DeltaTime: " << deltaTime << " time: " << m_time << " scale: " << currentScale << " tx: " << translationX);
+
+	OMat4 world, temp;
+
+	// Apply scale, rotation and translation (model matrix = Identity * Scale * Rotation * Translation)
+	temp.setIdentity();
+	temp.setScale(Ovec4(currentScale, currentScale, currentScale, 1));
+	world *= temp;
+
+	// Rotation angles for each axis (radians)
+	const f32 rotSpeedX = 1.0f;
+	const f32 rotSpeedY = 0.7f;
+	const f32 rotSpeedZ = 1.3f;
+	auto rotX = m_time * rotSpeedX;
+	auto rotY = m_time * rotSpeedY;
+	auto rotZ = m_time * rotSpeedZ;
+
+	temp.setIdentity();
+	temp.setRotationEuler(Ovec4(rotX, rotY, rotZ, 0));
+	world *= temp;
+
+	temp.setIdentity();
+	temp.setTranslation(Ovec4(translationX, 0, 0, 1));
+	world *= temp;
 
 	// Update UBO content with the new calculation before drawing
-	UniformData data = { currentScale };
+	UniformData data = { world };
 	m_uniform->setData(&data);
 
 	m_graphicsEngine->setShaderProgram(m_shader);

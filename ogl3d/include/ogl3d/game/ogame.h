@@ -38,5 +38,8 @@ protected:
 	// m_previousTime tracks the timestamp of the last frame for delta time calculation.
 	// m_scale is a demo parameter used to animate the polygon (e.g., pulsing or scaling logic).
 	std::chrono::system_clock::time_point m_previousTime;
-	f32 m_scale = 0;
+	f32 m_scale = 1.0f; // legacy: kept for compatibility with older code
+
+	// Time accumulator used for procedural animation (separate from m_scale)
+	f32 m_time = 0.0f;
 };

@@ -12,9 +12,11 @@ public:
 
 	ui32 getId();
 
-	// NOTE: declared but not yet implemented in overtexarrayobject.cpp,
-	// and m_vertexBufferData is never assigned in the constructor either —
-	// calling these will fail to link until both are wired up.
+	// Getters return the number of vertices in the buffer and the stride
+	// (vertex size in bytes). These are implemented in overtexarrayobject.cpp
+	// and the constructor stores a copy of the incoming OVertexBufferDesc so
+	// the values remain valid for the lifetime of the VAO object.
+
 	ui32 getVertexBufferSize();
 	ui32 getVertexSize();
 

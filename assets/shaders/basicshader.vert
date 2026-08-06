@@ -1,25 +1,20 @@
 #version 410 core
 
-uniform UniformData
+layout (row_major) uniform UniformData
 {
-	float scale;
+	mat4 world;
 };
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
 
-layout (location = 0) out vec3 outColor;
+layout(location = 0) out vec3 vertOutColor;
 
 
 void main()
 {
-
-	gl_Position.xyz = position * scale;
-
 	
+	gl_Position = world * vec4(position, 1);
 
-	gl_Position.w = 1.0;
-
-
-	outColor = color;
+	vertOutColor = color + vec3(world[3].xyz) * 0.5;
 }

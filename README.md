@@ -6,7 +6,7 @@ A simple 3D engine built from scratch in C++ using OpenGL and the native Win32 A
 
 ## Screenshots
 
-![Triangle rendered with a custom shader](screenshots/triangle_02.png)
+![Rectangle rendered with a custom shader](screenshots/rectangle.png)
 
 ## Features
 
@@ -17,6 +17,14 @@ A simple 3D engine built from scratch in C++ using OpenGL and the native Win32 A
 - **Engine-wide logging** via `OGL3D_ERROR` / `OGL3D_WARNING` / `OGL3D_INFO` macros — errors throw, warnings and info are logged to the console
 - **Platform-agnostic core** — engine logic (`OGame`, `OGraphicsEngine`, ...) is separated from Win32-specific code (`cwin32*.cpp`), in preparation for future Linux/macOS support
 - **CMake-based build**, no Visual Studio project files required
+ - **Vertex buffer abstraction** (`OVertexArrayObject`) wrapping VAO/VBO creation and cleanup, with support for multiple interleaved vertex attributes (e.g. position + color) per buffer
+ - **Shader system** (`OShaderProgram`) that loads, compiles, and links vertex/fragment shaders from external `.vert`/`.frag` files, with compile/link status and error/warning logging
+ - **Uniform Buffer Object (UBO) support** — engine-created uniform buffers can be bound to shader uniform blocks for efficient matrix/constant uploads (used by the demo world matrix)
+ - **Per-object animation** — the demo object supports time-driven scaling and translation; animations are frame-rate independent using a delta-time accumulator
+ - **Full 3-axis rotation** — objects can be rotated on X, Y and Z axes via Euler angles; rotation helpers were added to the minimal matrix math (OMat4)
+ - **Engine-wide logging** via `OGL3D_ERROR` / `OGL3D_WARNING` / `OGL3D_INFO` macros — errors throw, warnings and info are logged to the console (useful for shader compile/link diagnostics and runtime debug)
+ - **Platform-agnostic core** — engine logic (`OGame`, `OGraphicsEngine`, ...) is separated from Win32-specific code (`cwin32*.cpp`), in preparation for future Linux/macOS support
+ - **CMake-based build**, no Visual Studio project files required
 
 ## Tech stack
 
@@ -95,6 +103,11 @@ OGame
 
 `OGraphicsEngine` is constructed **before** `OWindow`, because it loads the WGL extension functions (via a temporary "dummy" context) that `OWindow` needs to create its real, modern OpenGL context.
 
+Notes about recent additions:
+- The engine now demonstrates a small object that uses a Uniform Buffer Object for its world matrix. The shader expects the block `UniformData` and the engine binds the UBO to slot 0.
+- The demo object is animated on the CPU: it pulses in scale, oscillates in translation and rotates around X/Y/Z using Euler angles. Animation is driven by a time accumulator to be framerate-independent.
+- The vertex shader uses the convention `gl_Position = world * vec4(position, 1);` to match the row-major CPU-side matrix layout.
+
 Code is split by platform to make future portability easier:
 - `ogame.cpp`, `ographicsengine.cpp`, etc. — platform-agnostic logic
 - `cwin32game.cpp`, `cwin32window.cpp`, `cwin32graphicsengine.cpp` — Win32-specific implementations
@@ -103,8 +116,8 @@ Errors, warnings, and info messages across the engine go through `OGL3D_ERROR` /
 
 ## Roadmap
 
-- [ ] Animations
-- [ ] Transformation matrices
+- [x] Animations (basic demo: scale/translate/rotate)
+- [x] Transformation matrices (OMat4 helpers: scale/translate/rotate)
 - [ ] Texture loading
 - [ ] Entity System
 

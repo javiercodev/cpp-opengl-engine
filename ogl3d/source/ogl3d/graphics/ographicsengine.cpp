@@ -28,7 +28,8 @@ OShaderProgramPtr OGraphicsEngine::createShaderProgram(const OShaderProgramDesc&
 void OGraphicsEngine::clear(const Ovec4& color)
 {
 	glClearColor(color.x, color.y, color.z, color.w);
-	glClear(GL_COLOR_BUFFER_BIT);
+	// Clear both color and depth buffers for correct 3D rendering
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void OGraphicsEngine::setViewport(const ORect& size)

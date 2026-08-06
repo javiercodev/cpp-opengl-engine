@@ -6,7 +6,7 @@ A simple 3D engine built from scratch in C++ using OpenGL and the native Win32 A
 
 ## Screenshots
 
-![Rectangle rendered with a custom shader](screenshots/rectangle.png)
+![Cube rendered with a custom shader](screenshots/cube.png)
 
 ## Features
 
@@ -17,6 +17,10 @@ A simple 3D engine built from scratch in C++ using OpenGL and the native Win32 A
 - **Engine-wide logging** via `OGL3D_ERROR` / `OGL3D_WARNING` / `OGL3D_INFO` macros — errors throw, warnings and info are logged to the console
 - **Platform-agnostic core** — engine logic (`OGame`, `OGraphicsEngine`, ...) is separated from Win32-specific code (`cwin32*.cpp`), in preparation for future Linux/macOS support
 - **CMake-based build**, no Visual Studio project files required
+  - **Demo object: 36‑vertex cube** — the sample object is now a cube (6 faces × 2 triangles × 3 vertices) rendered from an interleaved position+color buffer
+ - **Depth testing & face culling** — depth buffer clearing, GL_DEPTH_TEST and back-face culling are enabled for correct 3D rendering
+ - **Per-vertex color gradient** — the cube uses per-vertex colors to create a simple gradient shading that helps perceive 3D shape without lighting
+ - **Triangle list rendering** — draw call uses triangle list primitives (GL_TRIANGLES) for the cube
  - **Vertex buffer abstraction** (`OVertexArrayObject`) wrapping VAO/VBO creation and cleanup, with support for multiple interleaved vertex attributes (e.g. position + color) per buffer
  - **Shader system** (`OShaderProgram`) that loads, compiles, and links vertex/fragment shaders from external `.vert`/`.frag` files, with compile/link status and error/warning logging
  - **Uniform Buffer Object (UBO) support** — engine-created uniform buffers can be bound to shader uniform blocks for efficient matrix/constant uploads (used by the demo world matrix)
@@ -107,6 +111,9 @@ Notes about recent additions:
 - The engine now demonstrates a small object that uses a Uniform Buffer Object for its world matrix. The shader expects the block `UniformData` and the engine binds the UBO to slot 0.
 - The demo object is animated on the CPU: it pulses in scale, oscillates in translation and rotates around X/Y/Z using Euler angles. Animation is driven by a time accumulator to be framerate-independent.
 - The vertex shader uses the convention `gl_Position = world * vec4(position, 1);` to match the row-major CPU-side matrix layout.
+ - The demo object was changed from a screen-aligned rectangle to a 3D cube made of 36 vertices. The engine uploads an interleaved buffer (position + color) and issues a TriangleList draw call.
+ - Rendering now clears the depth buffer in addition to color, and enables GL_DEPTH_TEST (GL_LESS) plus back-face culling (GL_CULL_FACE, GL_BACK, CCW winding). This prevents interior faces from showing and produces correct depth ordering.
+ - A simple per-vertex gradient (colors vary by vertex Y) is used to visually emphasize the cube's 3D shape without adding lighting or normals. For realistic shading add normals + a lighting shader.
 
 Code is split by platform to make future portability easier:
 - `ogame.cpp`, `ographicsengine.cpp`, etc. — platform-agnostic logic

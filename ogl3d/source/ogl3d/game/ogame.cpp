@@ -33,13 +33,58 @@ OGame::~OGame()
 
 void OGame::onCreate()
 {
-	// Quad definition using 4 vertices for TriangleStrip usage.
-	// Vertex layout remains interleaved: Position (3f) + Color (3f)
+	// Cube definition using 36 vertices (6 faces × 2 triangles × 3 vertices).
+	// Vertex layout: Position (3f) + Color (3f) — gradient on Y (dark red base)
+	// Brightness = 0.6 when y=-0.5, 1.0 when y=0.5
+	// Base color = (0.8, 0.1, 0.1)
 	const f32 polygonVertices[] = {
-		-0.5f, -0.5f, 0.0f,   1, 0, 0, // bottom-left,  red
-		-0.5f,  0.5f, 0.0f,   0, 1, 0, // top-left,     green
-		 0.5f, -0.5f, 0.0f,   0, 0, 1, // bottom-right, blue
-		 0.5f,  0.5f, 0.0f,   1, 1, 0  // top-right,    yellow
+		// Front face
+		-0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		-0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		-0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+
+		// Back face
+		 0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+
+		// Right face
+		 0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+
+		// Left face
+		-0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		-0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		-0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+
+		// Top face
+		-0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+		-0.5f,  0.5f,  0.5f,  0.80f, 0.10f, 0.10f,
+		 0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+		-0.5f,  0.5f, -0.5f,  0.80f, 0.10f, 0.10f,
+
+		// Bottom face
+		-0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f, -0.5f, -0.5f,  0.48f, 0.06f, 0.06f,
+		 0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f,
+		-0.5f, -0.5f,  0.5f,  0.48f, 0.06f, 0.06f
 	};
 
 	OVertexAttribute attribsList[] = {
@@ -50,7 +95,7 @@ void OGame::onCreate()
 	m_polygonVAO = m_graphicsEngine->createVertexArrayObject({
 		(void*)polygonVertices,
 		sizeof(f32) * 6, // Stride: bytes per vertex
-		4,                // Total vertices
+		36,               // Total vertices (cube)
 		attribsList,
 		2
 		});
@@ -67,6 +112,13 @@ void OGame::onCreate()
 
 	// Link the shader's internal block "UniformData" to the hardware slot 0
 	m_shader->setUniformBufferSlot("UniformData", 0);
+
+	// Enable depth test and face culling for correct 3D rendering
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
 }
 
 void OGame::onUpdate()
@@ -96,7 +148,7 @@ void OGame::onUpdate()
 	// Compute translation (oscillates between -translationAmp..+translationAmp)
 	auto translationX = sinf(m_time * translationSpeed) * translationAmp;
 
-	OGL3D_INFO("DeltaTime: " << deltaTime << " time: " << m_time << " scale: " << currentScale << " tx: " << translationX);
+	
 
 	OMat4 world, temp;
 
@@ -130,9 +182,9 @@ void OGame::onUpdate()
 
 	// Pipeline Synchronization:
 	// The Uniform Buffer must be bound to slot 0 to match the setUniformBufferSlot call above.
-	// Switched draw call to TriangleStrip to render the 4-vertex quad correctly.
+	// Use TriangleList to render the cube (GL_TRIANGLES).
 	m_graphicsEngine->setUniformBuffer(m_uniform, 0);
-	m_graphicsEngine->drawTriangles(TriangleStrip, m_polygonVAO->getVertexBufferSize(), 0);
+	m_graphicsEngine->drawTriangles(TriangleList, m_polygonVAO->getVertexBufferSize(), 0);
 }
 
 void OGame::onQuit()
